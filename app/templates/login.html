@@ -8,7 +8,7 @@
   <meta name="description" content="My Web Site">
 </head>
 <body>
-    <h1>Sign In</h1>
+    <h1>Login</h1>
     <form method="POST" action="/login">
     <div>
         User Name:
@@ -26,6 +26,9 @@
         <button type="submit">Login</button>
     </div>
     </form>
+    {% if error %}
+        <p class="error"><strong>Error:</strong> {{ error }}
+    {% endif %}
 </body>
 </html>
 {% endblock %}

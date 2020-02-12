@@ -1,14 +1,19 @@
 from app import app
 from markdown import markdown
 from flask import render_template, redirect, url_for, render_template_string, request, session
-from os import listdir, walk
-from os.path import isfile, join
+from app.blog_helpers import render_markdown
 import flask
+import os
+import sqlite3
+
+conn = sqlite3.connect('user.db')
+
+c = conn.cursor()
 
 #home page
 @app.route("/")
 def home():
-    return render_template('base.html')
+    return render_template('home.html')
 
 #about page
 @app.route("/about")
@@ -20,31 +25,36 @@ def about():
 def login():
     error = None
     if request.method == 'POST':
-        if request.form['username'] != 'admin' or request.form['password'] != 'admin':
+        username = request.values['user_name']
+        password = request.values['password']
+
+        if request.values['user_name'] != 'admin' and request.values['password'] != 'admin':
             error = 'Invalid Credentials. Please try again.'
         else:
-            return redirect(url_for('home'))
-    return render_template('login.html', error=error)
+            session['user'] = username
+            session['password'] = password
+            return render_template('home.html')
 
-#@app.route("/edit/<string:id>", methods=['GET', 'POST'])
-#@is_logged_in
-#def edit_article(id):
+    return render_template('login.html', error = error)  
 
-@app.route("/<view_name>")
-def view_name():
-    html = render_template(view_name + '.md')
-    view_data = {}
-    return render_template(html, view_data = session)
+
+
 
 #route that shows all the files in the directory
 @app.route('/all')
 def all():
     #TODO: figure out how to find all files 
     #in the app
-    mypath = r'C:\\Users\\Onedrive\\Desktop\\bin\\flask-blog'
-    onlyfiles =  [f for f in listdir(mypath) if isfile(join(mypath, f))]
-    #for dirpath, dirnames, filenames in walk(mypath):
-
+    mypath = r'C:\Users\cresp\OneDrive\Desktop\bin\flask-blog\app\templates'
+    
     view_data = {}
-    view_data["pages"] = onlyfiles
-    return render_template("all.html", data = view_data)
+    view_data["pages"] = []
+    for (dirpath, dirnames, filenames) in os.walk(mypath):
+        for file in filenames:
+            view_data["pages"].append(os.path.splitext(file)[0])
+    
+    return render_template('all.html', data = view_data)
+
+@app.route('/edit/<page_name>')
+def edit(page_name):
+    render_template('home.html')
