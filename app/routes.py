@@ -6,9 +6,17 @@ import flask
 import os
 import sqlite3
 
+#creates a database named user.db
 conn = sqlite3.connect('user.db')
 
+#cursor that can use sqlite commands
 c = conn.cursor()
+
+#c.execute("""CREATE TABLE login (
+#            user_name text,
+#            password text
+#    )""")
+
 
 #home page
 @app.route("/")
@@ -37,7 +45,7 @@ def login():
 
     return render_template('login.html', error = error)  
 
-
+c.execute("INSERT INTO login VALUES('admin', 'admin')")
 
 
 #route that shows all the files in the directory
@@ -52,9 +60,10 @@ def all():
     for (dirpath, dirnames, filenames) in os.walk(mypath):
         for file in filenames:
             view_data["pages"].append(os.path.splitext(file)[0])
-    
     return render_template('all.html', data = view_data)
 
 @app.route('/edit/<page_name>')
 def edit(page_name):
-    render_template('home.html')
+    data = {}
+    data["page_name"] = page_name
+    render_template('home.html', data=data)
